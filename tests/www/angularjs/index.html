@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+
+  <head>
+    <script data-require="angular.js@1.3.8" data-semver="1.3.8" src="http://code.angularjs.org/1.3.8/angular.js"></script>
+    <link href="style.css" rel="stylesheet" />
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <div ng-controller="AppController as ctrl">
+      <div>
+        <h2>Angular {{appType}} app</h2>
+        <div><button ng-click="ctrl.getData()" class="refresh-data">Refresh data</button></div>
+        <table>
+          <tr>
+            <td>Request status</td>
+            <td>{{requestStatus}}</td>
+          </tr>
+          <tr>
+            <td>Request url</td>
+            <td>{{requestUrl}}</td>
+          </tr>
+          <tr>
+            <td>Response code</td>
+            <td class="response-code">{{responseCode}}</td>
+          </tr>
+          <tr>
+            <td>Response data</td>
+            <td>{{responseData | json}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </body>
+
+</html>
