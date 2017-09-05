@@ -22,6 +22,19 @@ function runAngularTests(angularVersion, url) {
                 }
             });
         }
+        function mockSampleRegexJson(text) {
+            if (!text) {
+                text = 'Mock';
+            }
+
+            MockService.addMock('sample-mock', {
+                path: /\/api\/[a-z].json/,
+                response: {
+                    status: 200,
+                    data: JSON.stringify({response: text})
+                }
+            });
+        }
 
         function clickRefreshButton() {
             return browser.element(by.css('.refresh-data')).click();
@@ -38,6 +51,12 @@ function runAngularTests(angularVersion, url) {
 
         it('should open page with happy case mocks', function () {
             mockSampleJson();
+            loadPage();
+            expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
+        });
+
+        it('should open page with happy case mocks with Regex', function () {
+            mockSampleRegexJson();
             loadPage();
             expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
         });
@@ -121,5 +140,3 @@ function runAngularTests(angularVersion, url) {
 
 runAngularTests(1, 'http://localhost:8080/angularjs');
 runAngularTests(2, 'http://localhost:8080/angular');
-
-
