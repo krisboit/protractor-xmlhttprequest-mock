@@ -22,6 +22,19 @@ function runAngularTests(angularVersion, url) {
                 }
             });
         }
+        async function mockSampleRegexJson(text) {
+            if (!text) {
+                text = 'Mock';
+            }
+
+            await MockService.addMock('sample-mock', {
+                path: /\/api\/[a-z].json/,
+                response: {
+                    status: 200,
+                    data: JSON.stringify({response: text})
+                }
+            });
+        }
 
         function clickRefreshButton() {
             return browser.element(by.css('.refresh-data')).click();
@@ -42,7 +55,14 @@ function runAngularTests(angularVersion, url) {
             expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
         });
 
+        it('should open page with happy case mocks with Regex', async () => {
+            mockSampleRegexJson();
+            await loadPage();
+            expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
+        });
+
         it('should reset mocks at page refresh', async () => {
+
             mockSampleJson();
             await loadPage();
 
@@ -145,5 +165,3 @@ function runAngularTests(angularVersion, url) {
 
 runAngularTests(1, 'http://localhost:8080/angularjs');
 runAngularTests(2, 'http://localhost:8080/angular');
-
-
