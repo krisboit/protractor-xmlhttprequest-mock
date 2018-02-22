@@ -1,0 +1,15 @@
+<html>
+<body>
+    <h1>This is a simulation of an external page.</h1>
+
+
+    <input type="text" id="navigateTo"/>
+    <button onclick="navigate(document.getElementById('navigateTo').value)">Navigate!</button>
+
+    <script>
+        function navigate(page) {
+            window.location.href = page;
+        }
+    </script>
+</body>
+</html>
