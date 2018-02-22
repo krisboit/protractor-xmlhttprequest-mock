@@ -29,6 +29,9 @@ import {Http} from '@angular/http'
         </tr>
       </table>
     </div>
+    
+    <div><a href="/external-page.html" class="external-page-link">external page</a></div>
+    <div><a href="/redirect.html" class="redirect-page-link">redirect page</a></div>
   `,
 })
 export class App {

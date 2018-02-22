@@ -6,15 +6,15 @@ function runAngularTests(angularVersion, url) {
         const ANGULAR_MOCK_APP_TITLE = 'Angular Mock app';
 
         function loadPage() {
-            browser.get(url)
+            return browser.get(url);
         }
 
-        function mockSampleJson(text) {
+        async function mockSampleJson(text) {
             if (!text) {
                 text = 'Mock';
             }
 
-            MockService.addMock('sample-mock', {
+            await MockService.addMock('sample-mock', {
                 path: '/api/sample.json',
                 response: {
                     status: 200,
@@ -22,12 +22,12 @@ function runAngularTests(angularVersion, url) {
                 }
             });
         }
-        function mockSampleRegexJson(text) {
+        async function mockSampleRegexJson(text) {
             if (!text) {
                 text = 'Mock';
             }
 
-            MockService.addMock('sample-mock', {
+            await MockService.addMock('sample-mock', {
                 path: /\/api\/[a-z].json/,
                 response: {
                     status: 200,
@@ -44,97 +44,122 @@ function runAngularTests(angularVersion, url) {
             return browser.element(by.css('h2')).getText();
         }
 
-        it('should open page without mocks', function () {
+        it('should open page without mocks', async () => {
+            await loadPage();
+            expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
+        });
+
+        it('should open page with happy case mocks', async () => {
+            mockSampleJson();
+            await loadPage();
+            expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
+        });
+
+        it('should open page with happy case mocks with Regex', async () => {
+            mockSampleRegexJson();
+            await loadPage();
+            expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
+        });
+
+        it('should reset mocks at page refresh', async () => {
+
+            mockSampleJson();
+            await loadPage();
+
+            let text = await getPageTitleText();
+            expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
             loadPage();
             expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
         });
 
-        it('should open page with happy case mocks', function () {
+        it('should be able to inject mock after page is loaded', async () => {
+            await loadPage();
+
+            let text = await getPageTitleText();
+            expect(text).toBe(ANGULAR_SAMPLE_APP_TITLE);
+
             mockSampleJson();
-            loadPage();
+            await clickRefreshButton();
             expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
         });
 
-        it('should open page with happy case mocks with Regex', function () {
-            mockSampleRegexJson();
-            loadPage();
+        it('should be able to overwrite a mock', async () => {
+            mockSampleJson();
+            await loadPage();
+            
+            let text = await getPageTitleText();
+            expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
+
+            mockSampleJson('New Mock');
+            await clickRefreshButton();
+            expect(getPageTitleText()).toBe('Angular New Mock app');
+        });
+
+        it('should reset mocks when calling reset function', async () => {
+            mockSampleJson();
+            await loadPage();
+            let text = await getPageTitleText();
+            expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
+
+            MockService.reset();
+            await clickRefreshButton();
+            expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
+        });
+
+        it('should be able to reinject mock at page reload', async () => {
+            mockSampleJson();
+            await loadPage();
+            let text = await getPageTitleText();
+            expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
+
+            MockService.reset();
+            mockSampleJson();
+            await loadPage();
             expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
         });
 
-        it('should reset mocks at page refresh', function () {
-            mockSampleJson();
-            loadPage();
-            getPageTitleText().then(function (text) {
-                expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
-                loadPage();
-                expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
-            });
-        });
-
-        it('should be able to inject mock after page is loaded', function () {
-            loadPage();
-            getPageTitleText().then(function (text) {
-                expect(text).toBe(ANGULAR_SAMPLE_APP_TITLE);
-                mockSampleJson();
-                clickRefreshButton().then(function () {
-                    expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
-                });
-            });
-        });
-
-        it('should be able to overwrite a mock', function () {
-            mockSampleJson();
-            loadPage();
-            getPageTitleText().then(function (text) {
-                expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
-
-                mockSampleJson('New Mock');
-                clickRefreshButton().then(function () {
-                    expect(getPageTitleText()).toBe('Angular New Mock app');
-                });
-            });
-        });
-
-        it('should reset mocks when calling reset function', function () {
-            mockSampleJson();
-            loadPage();
-            getPageTitleText().then(function (text) {
-                expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
-
-                MockService.reset();
-                clickRefreshButton().then(function () {
-                    expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
-                });
-            });
-        });
-
-        it('should be able to reinject mock at page reload', function () {
-            mockSampleJson();
-            loadPage();
-            getPageTitleText().then(function (text) {
-                expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
-
-                MockService.reset();
-                mockSampleJson();
-                loadPage();
-                expect(getPageTitleText()).toBe(ANGULAR_MOCK_APP_TITLE);
-
-            });
-        });
-
-        it('should be able to mock responses with other response code than 200', function () {
-            MockService.addMock('sample-mock', {
+        it('should be able to mock responses with other response code than 200', async () => {
+            await MockService.addMock('sample-mock', {
                 path: '/api/sample.json',
                 response: {
                     status: 404,
                     data: {response: 'Error 404'}
                 }
             });
-            loadPage();
+            await loadPage();
             expect(getPageTitleText()).toBe('Angular Error 404 app');
             expect(browser.element(by.css('.response-code')).getText()).toBe('404');
         });
 
+        it('should open the page after navigating to an external page', async () => {
+            mockSampleJson();
+            await loadPage();
+            await browser.waitForAngularEnabled(false);
+            await browser.element(by.css('.external-page-link')).click();
+            browser.sleep(1000);
+
+            await browser.element(by.css('#navigateTo')).clear().sendKeys('http://localhost:8080/angular');
+            browser.sleep(1000);
+            await browser.element(by.css('button')).click();
+            
+            await browser.waitForAngularEnabled(true);
+            await browser.refresh();
+            expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
+
+        });
+
+        it('should open the page after navigating to a redirect page', async () => {
+            mockSampleJson();
+            await loadPage();
+            await browser.waitForAngularEnabled(false);
+            await browser.element(by.css('.redirect-page-link')).click();
+            browser.sleep(1000);
+            await browser.waitForAngularEnabled(true);
+            expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
+        });
+
+        //TODO: readd mocks after navigating to external page
+        //TODO: readd mocks after navigating to a redirect page
     });
 }
 
