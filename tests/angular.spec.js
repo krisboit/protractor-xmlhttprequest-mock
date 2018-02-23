@@ -28,7 +28,7 @@ function runAngularTests(angularVersion, url) {
             }
 
             await MockService.addMock('sample-mock', {
-                path: /\/api\/[a-z].json/,
+                path: /\/api\/[a-z]*.json/,
                 response: {
                     status: 200,
                     data: JSON.stringify({response: text})
@@ -86,7 +86,7 @@ function runAngularTests(angularVersion, url) {
         it('should be able to overwrite a mock', async () => {
             mockSampleJson();
             await loadPage();
-            
+
             let text = await getPageTitleText();
             expect(text).toBe(ANGULAR_MOCK_APP_TITLE);
 
@@ -141,7 +141,7 @@ function runAngularTests(angularVersion, url) {
             await browser.element(by.css('#navigateTo')).clear().sendKeys('http://localhost:8080/angular');
             browser.sleep(1000);
             await browser.element(by.css('button')).click();
-            
+
             await browser.waitForAngularEnabled(true);
             await browser.refresh();
             expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
