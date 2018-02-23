@@ -1,4 +1,8 @@
+
 # protractor-xmlhttprequest-mock
+
+[![Build Status](https://travis-ci.org/krisboit/protractor-xmlhttprequest-mock.svg?branch=master)](https://travis-ci.org/krisboit/protractor-xmlhttprequest-mock)
+
 Ajax calls mocking plugin for protractor, will work with angular 2 also.
 
 ### A simple example of usage:
