@@ -1,7 +1,7 @@
 import {ProtractorBrowser} from 'protractor';
 
 export declare interface MockConfig {
-    path: string,
+    path: string | RegExp,
     response: {
         status: number,
         data: string
