@@ -1,11 +1,13 @@
 import {ProtractorBrowser} from 'protractor';
 
 export declare interface MockConfig {
+    method?: string,
     path: string | RegExp,
     response: Response
 }
 
 export declare interface MultipleMockResponseConfig {
+    method?: string,
     path: string | RegExp,
     response: Response[]
 }

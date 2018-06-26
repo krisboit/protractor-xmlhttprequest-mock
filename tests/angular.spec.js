@@ -220,6 +220,32 @@ function runAngularTests(angularVersion, url) {
             expect(getPageTitleText()).toBe(`Angular ${singleMockResponse} app`);
         });
 
+        it('should return correct mock based on method', async() => {
+            const postResponse = "Response for POST";
+            const getResponse = "Response for GET";
+            await MockService.addMocks('POST mocks', {
+                method: 'POST',
+                path: '/api/sample.json',
+                response: [{
+                    status: 200,
+                    data: JSON.stringify({response: postResponse})
+                }, {
+                    status: 500,
+                    data: JSON.stringify({response: postResponse})
+                }]
+            });
+            await MockService.addMock('GET mocks', {
+                method: 'GET',
+                path: '/api/sample.json',
+                response: {
+                    status: 200,
+                    data: JSON.stringify({response: getResponse})
+                }
+            });
+            await loadPage();
+            expect(getPageTitleText()).toBe(`Angular ${getResponse} app`);
+        });
+
         //TODO: read mocks after navigating to external page
         //TODO: read mocks after navigating to a redirect page
     });
