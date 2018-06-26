@@ -158,8 +158,70 @@ function runAngularTests(angularVersion, url) {
             expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
         });
 
-        //TODO: readd mocks after navigating to external page
-        //TODO: readd mocks after navigating to a redirect page
+        it('should allow you to set and use multiple mock response', async () => {
+            const expectedFirstResponse = "First Response";
+            const expectedSecondResponse = "Second Response";
+            await MockService.addMocks('multi-mock', {
+                path: '/api/sample.json',
+                response: [{
+                    status: 200,
+                    data: JSON.stringify({response: expectedFirstResponse})
+                }, {
+                    status: 200,
+                    data: JSON.stringify({response: expectedSecondResponse})
+                }]
+            });
+            await loadPage();
+            expect(getPageTitleText()).toBe(`Angular ${expectedFirstResponse} app`);
+            await browser.element(by.css('button')).click();
+            expect(getPageTitleText()).toBe(`Angular ${expectedSecondResponse} app`);
+        });
+
+        it('should use multi mock responses before using single mock responses', async () => {
+            const multiMockResponse = "Multi mock response";
+            await MockService.addMock('single-mock', {
+                path: '/api/sample.json',
+                response: {
+                    status: 200,
+                    data: JSON.stringify({response: "Single mock response"})
+                }
+            });
+            await MockService.addMocks('multiple-mocks', {
+                path: '/api/sample.json',
+                response: [{
+                    status: 200,
+                    data: JSON.stringify({response: multiMockResponse})
+                }]
+            });
+            await loadPage();
+            expect(getPageTitleText()).toBe(`Angular ${multiMockResponse} app`);
+        });
+
+        it('should use single mock when there are no more multi mock responses', async() => {
+            const singleMockResponse = "Single mock response";
+            const multiMockResponse = "Multi mock response";
+            await MockService.addMock('single-mock', {
+                path: '/api/sample.json',
+                response: {
+                    status: 200,
+                    data: JSON.stringify({response: singleMockResponse})
+                }
+            });
+            await MockService.addMocks('multiple-mocks', {
+                path: '/api/sample.json',
+                response: [{
+                    status: 200,
+                    data: JSON.stringify({response: multiMockResponse})
+                }]
+            });
+            await loadPage();
+            expect(getPageTitleText()).toBe(`Angular ${multiMockResponse} app`);
+            await browser.element(by.css('button')).click();
+            expect(getPageTitleText()).toBe(`Angular ${singleMockResponse} app`);
+        });
+
+        //TODO: read mocks after navigating to external page
+        //TODO: read mocks after navigating to a redirect page
     });
 }
 
