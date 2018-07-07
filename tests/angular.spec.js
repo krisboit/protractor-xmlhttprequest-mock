@@ -44,6 +44,11 @@ function runAngularTests(angularVersion, url) {
             return browser.element(by.css('h2')).getText();
         }
 
+        function checkData(responseCode, responseText) {
+            expect(browser.element(by.css('.response-code')).getText()).toBe(responseCode);
+            expect(browser.element(by.css('.response-data')).getText()).toContain(responseText);
+        }
+
         it('should open page without mocks', async () => {
             await loadPage();
             expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
@@ -157,6 +162,74 @@ function runAngularTests(angularVersion, url) {
             await browser.waitForAngularEnabled(true);
             expect(getPageTitleText()).toBe(ANGULAR_SAMPLE_APP_TITLE);
         });
+
+        it('should keep mocks forever if numberOfRequests is not specified', async () => {
+            mockSampleJson();
+            await loadPage();
+            checkData('200', "Mock");
+
+            for (let i=0; i < 5; i++) {
+                await clickRefreshButton();
+                browser.sleep(500);
+                checkData('200', "Mock");
+            }
+        });
+
+        it('should keep mock numberOfRequests times', async () => {
+            await MockService.addMock('sample-mock', {
+                path: '/api/sample.json',
+                response: [
+                    {
+                        status: 200,
+                        numberOfRequests: 2,
+                        data: JSON.stringify({response: "Mock"})
+                    }
+                ]
+            });
+            await loadPage();
+            checkData('200', "Mock");
+
+            await clickRefreshButton();
+            browser.sleep(500);
+            checkData('200', "Mock");
+
+            await clickRefreshButton();
+            browser.sleep(500);
+            checkData('200', "Sample");
+        });
+
+        it('should be able to specify multiple responses for a mock', async () => {
+            await MockService.addMock('sample-mock', {
+                path: '/api/sample.json',
+                response: [
+                    {
+                        status: 404,
+                        numberOfRequests: 1,
+                        data: JSON.stringify({response: "Mock1"})
+                    },
+                    {
+                        status: 200,
+                        numberOfRequests: 2,
+                        data: JSON.stringify({response: "Mock2"})
+                    }
+                ]
+            });
+            await loadPage();
+            checkData('404', "Mock1");
+
+            await clickRefreshButton();
+            browser.sleep(500);
+            checkData('200', "Mock2");
+
+            await clickRefreshButton();
+            browser.sleep(500);
+            checkData('200', "Mock2");
+
+            await clickRefreshButton();
+            browser.sleep(500);
+            checkData('200', "Sample");
+        });
+
 
         //TODO: readd mocks after navigating to external page
         //TODO: readd mocks after navigating to a redirect page

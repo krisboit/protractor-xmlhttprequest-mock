@@ -25,7 +25,7 @@ import {Http} from '@angular/http'
         </tr>
         <tr>
             <td>Response data</td>
-            <td>{{responseData | json}}</td>
+            <td class="response-data">{{responseData | json}}</td>
         </tr>
       </table>
     </div>

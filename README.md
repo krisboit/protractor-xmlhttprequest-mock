@@ -67,4 +67,35 @@ describe('the backend', () => {
   });
 });
 ```
-Other examples can be found in `tests` folder.
+
+### Multiple responses for a mock
+```ts
+import {browser, $} from 'protractor';
+import {MockService} from 'protractor-xmlhttprequest-mock';
+
+describe('the backend', () => {
+  it('should reply with code 418', () => {
+    MockService.setup(browser);
+    MockService.addMock('mock1', {
+      path: '/api/teapot',
+      mothod: 'get',
+      response: [
+        {status: 418, numberOfRequests: 1, data: "I'm a teapot"},
+        {status: 200, numberOfRequests: 2, data: "I'm not a teapot"},
+        {status: 418, numberOfRequests: 1, data: "I'm a teapot again"}
+        ],
+    });
+    MockService.addMock('mock2', {
+      path: '/api/teapot',
+      mothod: 'post',
+      response: {status: 401, data: "unauthorized"},
+    });
+
+    $('button').click();
+    expect($('div').getText()).toEqual("I'm a teapot");
+  });
+});
+```
+*****Note `numberOfRequests` is mandatory.**
+
+Other examples can be found in the tests from  `tests` folder.
