@@ -13,6 +13,7 @@ export declare interface ResponseMock {
 
 export declare interface MockConfig {
     path: string | RegExp,
+    method?: string,
     response: SimpleResponseMock | ResponseMock[]
 }
 

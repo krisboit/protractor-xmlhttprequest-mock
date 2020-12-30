@@ -53,12 +53,12 @@ describe('the backend', () => {
     MockService.setup(browser);
     MockService.addMock('mock1', {
       path: '/api/teapot',
-      mothod: 'get',
+      method: 'get',
       response: {status: 418, data: "I'm a teapot"},
     });
     MockService.addMock('mock2', {
       path: '/api/teapot',
-      mothod: 'post',
+      method: 'post',
       response: {status: 401, data: "unauthorized"},
     });
 
@@ -78,7 +78,7 @@ describe('the backend', () => {
     MockService.setup(browser);
     MockService.addMock('mock1', {
       path: '/api/teapot',
-      mothod: 'get',
+      method: 'get',
       response: [
         {status: 418, numberOfRequests: 1, data: "I'm a teapot"},
         {status: 200, numberOfRequests: 2, data: "I'm not a teapot"},
@@ -87,7 +87,7 @@ describe('the backend', () => {
     });
     MockService.addMock('mock2', {
       path: '/api/teapot',
-      mothod: 'post',
+      method: 'post',
       response: {status: 401, data: "unauthorized"},
     });
 
